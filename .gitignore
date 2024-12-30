@@ -1,0 +1,57 @@
+# .vs 폴더 (Visual Studio 설정)
+.vs/
+
+# 빌드 아티팩트
+[Dd]ebug/
+[Dd]ebug64/
+[Dd]ebugMixed/
+[Dd]ist/
+[Dd]eploy/
+[Dd]ebugStatic/
+[Dd]ebug_ARM/
+[Dd]ebug_x64/
+[Dd]ebug_x86/
+x64/
+x86/
+
+# 빌드 출력 파일
+*.user
+*.userosscache
+*.suo
+*.sdf
+*.opensdf
+*.dbmdl
+*.vcxproj.user
+*.vcxproj.filters
+
+# 빌드 캐시
+*.obj
+*.pch
+*.idb
+*.pdb
+*.lib
+*.exp
+*.dll
+*.exe
+
+# CMake 캐시 파일 (CMake 사용 시)
+CMakeCache.txt
+CMakeFiles/
+Makefile
+CMakeScripts/
+*.cmake
+
+# Visual Studio Code 설정 (VSCode를 사용하는 경우)
+.vscode/
+
+# 패키지 관리 도구
+*.ncb
+*.vspscc
+*.vssscc
+
+# 프로젝트 관련 캐시
+Thumbs.db
+ehthumbs.db
+
+# Windows 시스템 파일
+Desktop.ini
