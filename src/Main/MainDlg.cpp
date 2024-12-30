@@ -8,6 +8,10 @@
 #include "MainDlg.h"
 #include "afxdialogex.h"
 
+#include "ImageObject/ImageObject.h"
+#include "OpencvDLL/OpencvDLL.h"
+#include "CustomDLL/CustomDLL.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -31,6 +35,7 @@ void CMainDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CMainDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BUTTON1, &CMainDlg::OnBnClickedButton1)
 END_MESSAGE_MAP()
 
 
@@ -86,3 +91,12 @@ HCURSOR CMainDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CMainDlg::OnBnClickedButton1()
+{
+	ImageObject* i = new ImageObject();
+	ImageObject* i2 = new ImageObject();
+	OpencvDLL::ImageBlur(i, i2, 2);
+	CustomDLL::ImageBlur(i, i2, 2);
+}
