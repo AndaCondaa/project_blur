@@ -95,8 +95,17 @@ HCURSOR CMainDlg::OnQueryDragIcon()
 
 void CMainDlg::OnBnClickedButton1()
 {
+
 	ImageObject* i = new ImageObject();
 	ImageObject* i2 = new ImageObject();
-	OpencvDLL::ImageBlur(i, i2, 2);
-	CustomDLL::ImageBlur(i, i2, 2);
+
+	if (!i->ImageLoad("C:\\Users\\Simon\\Desktop\\project_blur\\test_bench\\image\\1.png", m_strErrorMsg))
+		std::cout << m_strErrorMsg << std::endl;
+
+	if (!i2->ImageLoad("C:\\Users\\Simon\\Desktop\\project_blur\\test_bench\\image\\color1.jpg", m_strErrorMsg))
+		std::cout << m_strErrorMsg << std::endl;
+
+	//ImageObject* i2 = new ImageObject();
+	//OpencvDLL::ImageBlur(i, i2, 2);
+	//CustomDLL::ImageBlur(i, i2, 2);
 }

@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include <iostream>
 
 // CMainDlg 대화 상자
 class CMainDlg : public CDialogEx
@@ -32,4 +32,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedButton1();
+
+public:
+	std::string m_strErrorMsg = "";
 };

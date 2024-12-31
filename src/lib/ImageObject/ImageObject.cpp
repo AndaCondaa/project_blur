@@ -2,23 +2,38 @@
 #include "ImageObject.h"
 #include "opencv2/opencv.hpp"
 
-ImageObject::ImageObject() {
-    std::cout << "IMAGEOBJECT" << std::endl;
+ImageObject::~ImageObject() {
 
-    cv::Mat image = cv::imread("C:\\Users\\Simon\\Desktop\\project_blur\\test_bench\\image/1.png", cv::IMREAD_COLOR);
+}
 
-    // 이미지 로드 실패 확인
-    if (image.empty())
+bool ImageObject::ImageLoad(std::string _strPath, std::string& _strError)
+{
+    cv::Mat matImg = cv::imread(_strPath, cv::IMREAD_UNCHANGED);
+
+    if (matImg.empty())
     {
-        printf("error\n");
+        _strError = "[ImageObject] Fail Path Error : " + _strPath;
+        return false;
+    }
+    else if (matImg.channels() > 1)
+    {
+        _strError = "[ImageObject] Not Grayscale Image : " + _strPath;
+        return false;
     }
     else
     {
-        std::cout << image.cols << std::endl;
-        std::cout << image.rows << std::endl;
+        m_nWidth = matImg.cols;
+        m_nHeight = matImg.rows;
     }
+
+
+    std::cout << m_nWidth << std::endl;
+    std::cout << m_nHeight << std::endl;
+
+    return true;
 }
 
-ImageObject::~ImageObject() {
-
+bool ImageObject::CovertToMat(cv::Mat& _dst)
+{
+    return true;
 }
