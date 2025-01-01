@@ -1,22 +1,34 @@
 #pragma once
+#include <iostream>
+#include <vector>
+#include "opencv2/opencv.hpp"
+
 #ifdef IMAGEOBJECT_EXPORTS
 #define IMAGEOBJECT_API __declspec(dllexport)
 #else
 #define IMAGEOBJECT_API __declspec(dllimport)
 #endif
-#include <iostream>
 
 class IMAGEOBJECT_API ImageObject {
 public:
     ImageObject() {};
+    ImageObject(std::string _path) {
+        m_strPath = _path;
+    };
     ~ImageObject();
 
 public:
-    bool ImageLoad(std::string _strPath, std::string& _strError);
-    bool CovertToMat(cv::Mat& _dst);
+    void SetPath(std::string _strPath);
+    bool ImageLoad();
+    bool ImageSave();
+    bool MatToObj(cv::Mat _src);
 
 public:
+    std::string m_strPath = "";
     int m_nWidth;
     int m_nHeight;
-    unsigned char* m_buffer;
+    int m_nPixelBytes;
+    int m_nImageType;
+    unsigned char* m_pBuffer;
+    
 };

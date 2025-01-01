@@ -4,6 +4,7 @@
 
 #pragma once
 #include <iostream>
+#include <vector>
 
 // CMainDlg 대화 상자
 class CMainDlg : public CDialogEx
@@ -32,7 +33,16 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedButton1();
+	bool GetConfValues();
+	void WriteLog(std::string _strLog);
 
 public:
 	std::string m_strErrorMsg = "";
+	int m_nImageCnt;
+	int m_nKernel_size;
+	std::vector<std::string> m_vecInputPath;
+	std::vector<std::string> m_vecOpencvPath;
+	std::vector<std::string> m_vecCustomPath;
 };
+
+

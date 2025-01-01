@@ -1,9 +1,42 @@
 ﻿  pch.cpp
   CustomDLL.cpp
+C:\Users\Simon\Desktop\project_blur\src\lib\ImageObject\ImageObject.h(27,17): warning C4251: 'ImageObject::m_strPath': class 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>'에서는 class 'ImageObject'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 합니다.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.29.30133\include\xstring(4871): message : 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' 선언을 참조하십시오.
+C:\Users\Simon\Desktop\project_blur\src\lib\CustomDLL\CustomDLL.cpp(41,1): warning C4244: '+=': 'double'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=unsigned char
+          ]
+C:\Users\Simon\Desktop\project_blur\src\lib\CustomDLL\CustomDLL.cpp(77): message : 컴파일되는 함수 템플릿 인스턴스화 'void CustomDLL::ProcBlur<unsigned char>(T *,int,int,int)'에 대한 참조를 확인하세요.
+          with
+          [
+              T=unsigned char
+          ]
+C:\Users\Simon\Desktop\project_blur\src\lib\CustomDLL\CustomDLL.cpp(20,21): warning C4101: 'idx' :참조되지 않은 지역 변수입니다.
+C:\Users\Simon\Desktop\project_blur\src\lib\CustomDLL\CustomDLL.cpp(41,1): warning C4244: '+=': 'double'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=unsigned short
+          ]
+C:\Users\Simon\Desktop\project_blur\src\lib\CustomDLL\CustomDLL.cpp(93): message : 컴파일되는 함수 템플릿 인스턴스화 'void CustomDLL::ProcBlur<unsigned short>(T *,int,int,int)'에 대한 참조를 확인하세요.
+          with
+          [
+              T=unsigned short
+          ]
+C:\Users\Simon\Desktop\project_blur\src\lib\CustomDLL\CustomDLL.cpp(41,1): warning C4244: '+=': 'double'에서 'T'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+          with
+          [
+              T=unsigned int
+          ]
+C:\Users\Simon\Desktop\project_blur\src\lib\CustomDLL\CustomDLL.cpp(118): message : 컴파일되는 함수 템플릿 인스턴스화 'void CustomDLL::ProcBlur<unsigned int>(T *,int,int,int)'에 대한 참조를 확인하세요.
+          with
+          [
+              T=unsigned int
+          ]
   dllmain.cpp
      C:\Users\Simon\Desktop\project_blur\src\build\CustomDLL.lib 라이브러리 및 C:\Users\Simon\Desktop\project_blur\src\build\CustomDLL.exp 개체를 생성하고 있습니다.
   코드를 생성하고 있습니다.
   Previous IPDB not found, fall back to full compilation.
-  All 12 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 15 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   코드를 생성했습니다.
   CustomDLL.vcxproj -> C:\Users\Simon\Desktop\project_blur\src\build\CustomDLL.dll

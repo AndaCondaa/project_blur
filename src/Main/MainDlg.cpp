@@ -12,6 +12,8 @@
 #include "OpencvDLL/OpencvDLL.h"
 #include "CustomDLL/CustomDLL.h"
 
+#include <fstream>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -91,21 +93,124 @@ HCURSOR CMainDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
 void CMainDlg::OnBnClickedButton1()
 {
+	if (!GetConfValues())
+		return;
+	
+	for (int i = 0; i < m_nImageCnt; i++)
+	{
+		ImageObject* src = new ImageObject(m_vecInputPath.at(i));
+		ImageObject* dst_opencv = new ImageObject(m_vecOpencvPath.at(i));
+		ImageObject* dst_custom = new ImageObject(m_vecCustomPath.at(i));
 
-	ImageObject* i = new ImageObject();
-	ImageObject* i2 = new ImageObject();
+		if (!src->ImageLoad())
+		{
+			continue;
+		}
+		
+		WriteLog("[OpencvDLL] Blur Start");
+		if (!OpencvDLL::ImageBlur(src, dst_opencv, m_nKernel_size))
+		{
+			WriteLog("[OpencvDLL] Blur Error");
+			return;
+		}
+		else
+		{
+			dst_opencv->ImageSave();
+			WriteLog("[OpencvDLL] Blur Done");
+		}
 
-	if (!i->ImageLoad("C:\\Users\\Simon\\Desktop\\project_blur\\test_bench\\image\\1.png", m_strErrorMsg))
-		std::cout << m_strErrorMsg << std::endl;
+		WriteLog("[CustomDLL] Blur Start");
+		if (!CustomDLL::ImageBlur(src, dst_custom, m_nKernel_size))
+		{
+			WriteLog("[CustomDLL] Blur Error");
+			return;
+		}
+		else
+		{
+			dst_custom->ImageSave();
+			WriteLog("[CustomDLL] Blur Done");
+		}
+		std::cout << "Done" << std::endl;
+	}
+}
 
-	if (!i2->ImageLoad("C:\\Users\\Simon\\Desktop\\project_blur\\test_bench\\image\\color1.jpg", m_strErrorMsg))
-		std::cout << m_strErrorMsg << std::endl;
+bool CMainDlg::GetConfValues()
+{
+	m_nKernel_size = 0;
+	m_vecInputPath.clear();
+	m_vecOpencvPath.clear();
+	m_vecCustomPath.clear();
 
-	//ImageObject* i2 = new ImageObject();
-	//OpencvDLL::ImageBlur(i, i2, 2);
-	//CustomDLL::ImageBlur(i, i2, 2);
+	TCHAR buffer[4096];
+	GetPrivateProfileString(_T("INPUT"), _T("kernel_size"), _T("21"), buffer, sizeof(buffer), _T("./Conf.ini"));
+	m_nKernel_size = _ttoi(buffer);
+	if (m_nKernel_size < 21)
+		m_nKernel_size = 21;
+
+	int cnt = 1;
+	while (true)
+	{
+		CString key;
+		key.Format(_T("%d"), cnt);
+		GetPrivateProfileString(_T("INPUT"), key, _T("error"), buffer, sizeof(buffer), _T("./Conf.ini"));
+		CString path(buffer);
+		if (path == _T("error"))
+			break;
+		std::string str = std::string(CT2CA(path));
+		m_vecInputPath.push_back(str);
+		cnt++;
+	}
+
+	cnt = 1;
+	while (true)
+	{
+		CString key;
+		key.Format(_T("%d"), cnt);
+		GetPrivateProfileString(_T("OUTPUT_OPENCV"), (LPCTSTR)key, _T("error"), buffer, sizeof(buffer), _T("./Conf.ini"));
+		CString path(buffer);
+		if (path == _T("error"))
+			break;
+		std::string str = std::string(CT2CA(path));
+		m_vecOpencvPath.push_back(str);
+		cnt++;
+	}
+
+	cnt = 1;
+	while (true)
+	{
+		CString key;
+		key.Format(_T("%d"), cnt);
+		GetPrivateProfileString(_T("OUTPUT_CUSTOM"), (LPCTSTR)key, _T("error"), buffer, sizeof(buffer), _T("./Conf.ini"));
+		CString path(buffer);
+		if (path == _T("error"))
+			break;
+		std::string str = std::string(CT2CA(path));
+		m_vecCustomPath.push_back(str);
+		cnt++;
+	}
+
+
+	if (m_vecInputPath.size() < 1 || (m_vecInputPath.size() != m_vecOpencvPath.size()) || (m_vecInputPath.size() != m_vecCustomPath.size()))
+	{
+		WriteLog("[ERROR] Check Conf File. (Check the path)");
+		return false;
+	}
+
+	m_nImageCnt = m_vecInputPath.size();
+	
+	return true;
+}
+
+void CMainDlg::WriteLog(std::string _strLog)
+{
+	auto now = std::chrono::system_clock::now();
+	std::time_t current_time = std::chrono::system_clock::to_time_t(now);
+	std::tm tm_time= *std::localtime(&current_time);
+
+	std::ofstream file("image_blur.log", std::ios_base::app);
+	if (!file)	return;
+
+	file << std::put_time(&tm_time, "[%Y-%m-%d %H:%M:%S]") << " - " << _strLog << std::endl;
 }
