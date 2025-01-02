@@ -13,16 +13,15 @@
 #include "CustomDLL/CustomDLL.h"
 
 #include <fstream>
-
+#include <time.h>
+#include <windows.h>
+#include <psapi.h>
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
 // CMainDlg 대화 상자
-
-
-
 CMainDlg::CMainDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_MAIN_DIALOG, pParent)
 {
@@ -109,6 +108,7 @@ void CMainDlg::OnBnClickedButton1()
 			continue;
 		}
 		
+		clock_t start_opencv = clock();
 		WriteLog("[OpencvDLL] Blur Start");
 		if (!OpencvDLL::ImageBlur(src, dst_opencv, m_nKernel_size))
 		{
@@ -117,10 +117,16 @@ void CMainDlg::OnBnClickedButton1()
 		}
 		else
 		{
+			clock_t end = clock();
+			double duration = (double)(end - start_opencv) / CLOCKS_PER_SEC;
+			CString log;
+			log.Format(_T("[OpencvDLL] Blur Done (Time: %f)"), duration);
+			WriteLog(std::string(CT2CA(log)));
+
 			dst_opencv->ImageSave();
-			WriteLog("[OpencvDLL] Blur Done");
 		}
 
+		clock_t start_custom = clock();
 		WriteLog("[CustomDLL] Blur Start");
 		if (!CustomDLL::ImageBlur(src, dst_custom, m_nKernel_size))
 		{
@@ -129,10 +135,18 @@ void CMainDlg::OnBnClickedButton1()
 		}
 		else
 		{
+			clock_t end = clock();
+			double duration = (double)(end - start_custom) / CLOCKS_PER_SEC;
+			CString log;
+			log.Format(_T("[CustomDLL] Blur Done (Time: %f)"), duration);
+			WriteLog(std::string(CT2CA(log)));
+
 			dst_custom->ImageSave();
-			WriteLog("[CustomDLL] Blur Done");
 		}
-		std::cout << "Done" << std::endl;
+
+		delete src;
+		delete dst_opencv;
+		delete dst_custom;
 	}
 }
 
@@ -213,4 +227,5 @@ void CMainDlg::WriteLog(std::string _strLog)
 	if (!file)	return;
 
 	file << std::put_time(&tm_time, "[%Y-%m-%d %H:%M:%S]") << " - " << _strLog << std::endl;
+	std::cout << std::put_time(&tm_time, "[%Y-%m-%d %H:%M:%S]") << " - " << _strLog << std::endl;
 }

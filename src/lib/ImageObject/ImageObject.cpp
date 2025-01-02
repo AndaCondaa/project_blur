@@ -19,17 +19,12 @@ bool ImageObject::ImageLoad()
         std::cout << "[ImageObject] Not Setting Path" << std::endl;
         return false;
     }
-        
+
     cv::Mat matImg = cv::imread(m_strPath, cv::IMREAD_UNCHANGED);
-  
+
     if (matImg.empty())
     {
         std::cout << "[ImageObject] Fail Path Error : " + m_strPath << std::endl;
-        return false;
-    }
-    else if (matImg.channels() > 1)
-    {
-        std::cout << "[ImageObject] Not Grayscale Image : " + m_strPath << std::endl;
         return false;
     }
     else
@@ -39,12 +34,35 @@ bool ImageObject::ImageLoad()
         m_nPixelBytes = matImg.elemSize();
         m_nImageType = matImg.type();
 
-        int size = m_nWidth * m_nHeight * m_nPixelBytes;
-        unsigned char* src = matImg.data;
-        unsigned char* dst = new unsigned char[size];
-        std::memcpy(dst, src, size);
-        m_pBuffer = dst;
+        int pixelCount = m_nWidth * m_nHeight;
+
+
+        // 타입확인
+        if (m_nImageType == CV_8UC1)
+        {
+            unsigned char* buffer = new unsigned char[pixelCount];
+            std::memcpy(buffer, matImg.data, pixelCount * sizeof(unsigned char));
+            m_pBuffer = buffer;
+        }
+        else if (m_nImageType == CV_16UC1)
+        {
+            unsigned short* buffer = new unsigned short[pixelCount];
+            std::memcpy(buffer, matImg.data, pixelCount * sizeof(unsigned short));
+            m_pBuffer = buffer;
+        }
+        else if (m_nImageType == CV_32FC1)
+        {
+            float* buffer = new float[pixelCount];
+            std::memcpy(buffer, matImg.data, pixelCount * sizeof(float));
+            m_pBuffer = buffer;
+        }
+        else
+        {
+            std::cout << "[ImageObject] Not Support color image" << std::endl;
+            return false;
+        }
     }
+
     return true;
 }
 
@@ -52,9 +70,11 @@ bool ImageObject::ImageSave()
 {
     std::filesystem::path dirPath = std::filesystem::path(m_strPath).parent_path();
 
-    if (!std::filesystem::exists(dirPath)) {
-        if (!std::filesystem::create_directories(dirPath)) {
-            std::cerr << "디렉토리 생성 실패: " << dirPath << std::endl;
+    if (!std::filesystem::exists(dirPath)) 
+    {
+        if (!std::filesystem::create_directories(dirPath)) 
+        {
+            std::cout << "[ImageObject] Making Dir Error : " << dirPath << std::endl;
             return false;
         }
     }
@@ -73,9 +93,8 @@ bool ImageObject::MatToObj(cv::Mat _src)
     m_nImageType = _src.type();
 
     int size = m_nWidth * m_nHeight * m_nPixelBytes;
-    unsigned char* src = _src.data;
     unsigned char* dst = new unsigned char[size];
-    std::memcpy(dst, src, size);
+    std::memcpy(dst, _src.data, size);
     m_pBuffer = dst;
 
     return true;

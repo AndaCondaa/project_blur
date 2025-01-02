@@ -29,6 +29,5 @@ public:
     int m_nHeight;
     int m_nPixelBytes;
     int m_nImageType;
-    unsigned char* m_pBuffer;
-    
+    void* m_pBuffer = nullptr;
 };

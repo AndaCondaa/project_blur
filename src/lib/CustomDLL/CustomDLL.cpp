@@ -3,61 +3,89 @@
 #include <iostream>
 #include <cmath>
 
-namespace CustomDLL {
-    template <typename T>
-    void ProcBlur(T* buffer, int width, int height, int kernelSize) {
-        std::cout << "start" << std::endl;
 
-        // kernel 크기 조정 (홀수로 만들어줌)
-        if (kernelSize % 2 == 0)
-            kernelSize = kernelSize + 1;
+template <typename T>
+void ProcBlur(T* buffer, int width, int height, int kernelSize)
+{
 
-        int size = width * height;
-        int totalKernelSize = kernelSize * kernelSize;
-        int padSize = (kernelSize - 1) / 2;
-        T* output = new T[size];
-        T sum = 0;
-        int ix, iy, idx;
+    if (kernelSize % 2 == 0)
+        kernelSize += 1;
 
-        std::cout << "for start" << std::endl;
-        for (int y = 0; y < height; y++) 
+    int padSize = kernelSize / 2;
+    int size = width * height;
+
+
+    std::vector<unsigned long long> vecSum(size, 0);
+
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
         {
-            if (y % 100 == 0)
-                std::cout << y << std::endl;
-            for (int x = 0; x < width; x++) 
-            {
-                sum = 0;
+            unsigned long long current = buffer[x + y * width];
 
-                for (int ky = -padSize; ky <= padSize; ky++) 
-                {
-                    for (int kx = -padSize; kx <= padSize; kx++) 
-                    {
-                        iy = y + ky;
-                        ix = x + kx;
-
-
-                        if (ix < 0 || ix >= width || iy < 0 || iy >= height) 
-                        {
-                            sum += 0;
-                        }
-                        else
-                        {
-                            sum += std::round(static_cast<double>(buffer[ix + iy * width]) / totalKernelSize);
-                        }
-                    }
-                }
-
-                output[x + y * width] = sum;
+            unsigned long long left = 0;
+            if (x > 0) {
+                left = vecSum[x - 1 + y * width];
             }
+
+            unsigned long long top = 0;
+            if (y > 0) {
+                top = vecSum[x + (y - 1) * width];
+            }
+
+            unsigned long long topLeft = 0;
+            if (x > 0 && y > 0) {
+                topLeft = vecSum[x - 1 + (y - 1) * width];
+            }
+
+            vecSum[x + y * width] = current + left + top - topLeft;
         }
-
-        std::cout << "for end" << std::endl;
-        std::memcpy(buffer, output, size * sizeof(T));
-
-        std::cout << "end" << std::endl;
-        delete[] output;
     }
 
+    T* output = new T[size];
+
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            int l = x - padSize;
+            if (l < 0)
+                l = 0;
+
+            int r = x + padSize;
+            if (r >= width)
+                r = width - 1;
+
+            int t = y - padSize;
+            if (t < 0)
+                t = 0;
+
+            int b = y + padSize;
+            if (b >= height)
+                b = height - 1;
+
+            unsigned long long sum = vecSum[r + b * width];
+
+            if (l > 0)
+                sum -= vecSum[l - 1 + b * width];
+
+            if (t > 0)
+                sum -= vecSum[r + (t - 1) * width];
+
+            if (l > 0 && t > 0)
+                sum += vecSum[l - 1 + (t - 1) * width];
+
+            int blurValue = (r - l + 1) * (b - t + 1);
+            output[x + y * width] = static_cast<T>(std::round(static_cast<double>(sum) / blurValue));
+        }
+    }
+
+    std::memcpy(buffer, output, size * sizeof(T));
+    delete[] output;
+}
+
+
+namespace CustomDLL {
     bool ImageBlur(const ImageObject* src, ImageObject* dst, const int kernelSize)
     {
         dst->m_nWidth = src->m_nWidth;
@@ -70,72 +98,29 @@ namespace CustomDLL {
         unsigned char* inputBuffer = new unsigned char[imageSize];
         std::memcpy(inputBuffer, src->m_pBuffer, imageSize);
 
-
         unsigned char* result = new unsigned char[imageSize];
 
-        if (dst->m_nPixelBytes == 1) 
-        {// 8bit
-            unsigned char* buffer = inputBuffer;
-
-            // Blur
+        if (dst->m_nImageType == CV_8UC1)
+        {
+            unsigned char* buffer = reinterpret_cast<unsigned char*>(inputBuffer);
             ProcBlur(buffer, dst->m_nWidth, dst->m_nHeight, kernelSize);
             std::memcpy(result, buffer, imageSize);
-
-            delete[] buffer;
         }
-        else if (dst->m_nPixelBytes == 2) 
-        {// 16bit
-            unsigned short* buffer = new unsigned short[pixelSize];
-
-            // 8bit to 16bit
-            for (int i = 0; i < pixelSize; ++i) 
-            {
-                buffer[i] = (static_cast<unsigned short>(inputBuffer[2 * i]) << 8) | inputBuffer[2 * i + 1];
-            }
-
-            // Blur
+        else if (dst->m_nImageType == CV_16UC1)
+        {
+            unsigned short* buffer = reinterpret_cast<unsigned short*>(inputBuffer);
             ProcBlur(buffer, dst->m_nWidth, dst->m_nHeight, kernelSize);
-
-            // 16bit to 8bit
-            for (int i = 0; i < pixelSize; ++i) 
-            {
-                result[2 * i] = static_cast<unsigned char>(buffer[i] >> 8);
-                result[2 * i + 1] = static_cast<unsigned char>(buffer[i] & 0xFF);
-            }
-
-            delete[] buffer;
+            std::memcpy(result, buffer, imageSize);
         }
-        else if (dst->m_nPixelBytes == 4) 
-        {// 32bit
-            unsigned int* buffer = new unsigned int[pixelSize];
-
-            // 8bit to 32bit
-            for (int i = 0; i < pixelSize; ++i) 
-            {
-                buffer[i] = (static_cast<unsigned int>(inputBuffer[4 * i]) << 24) |
-                            (static_cast<unsigned int>(inputBuffer[4 * i + 1]) << 16) |
-                            (static_cast<unsigned int>(inputBuffer[4 * i + 2]) << 8) |
-					        inputBuffer[4 * i + 3];
-            }
-
-            // Blur
+        else if (dst->m_nImageType == CV_32FC1)
+        {
+            float* buffer = reinterpret_cast<float*>(inputBuffer);
             ProcBlur(buffer, dst->m_nWidth, dst->m_nHeight, kernelSize);
-
-            // 32bit to 8bit
-            for (int i = 0; i < pixelSize; ++i) 
-            {
-                result[4 * i] = static_cast<unsigned char>(buffer[i] >> 24);  // 32bit -> 8bit로 변환 (상위 바이트)
-                result[4 * i + 1] = static_cast<unsigned char>(buffer[i] >> 16);
-                result[4 * i + 2] = static_cast<unsigned char>(buffer[i] >> 8);
-                result[4 * i + 3] = static_cast<unsigned char>(buffer[i] & 0xFF);  // 하위 바이트
-            }
-
-            delete[] buffer;
+            std::memcpy(result, buffer, imageSize);
         }
 
         dst->m_pBuffer = result;
+        delete[] inputBuffer;
         return true;
     }
-
-
 }
